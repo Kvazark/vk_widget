@@ -1,5 +1,5 @@
 const widget = document.getElementById('widget');
-const apiUrl = 'https://api.vk.com/method/wall.get';
+const apiUrl = 'https://api.vk.com/method/wall.get?';
 const ownerId = '-61817535'; // Идентификатор паблика VK
 const version = '5.131'; // Версия API VK
 const count = 10; // Количество постов для загрузки
@@ -224,18 +224,76 @@ let offset = 0; // смещение для загрузки следующей �
 // loadPosts(); //! загружаем первую партию постов
 // setInterval(checkLocalStorage, 1000); //! проверяем localStorage каждые 1000 мсек
 // Импортируем необходимые данные и инициализируем переменные
-function loadPosts() { //! объявляем функцию загрузки постов
-    VK.Api.call('wall.get', { //! запрос использует ключевые слова VK.Api.call для вызова метода получения постов первый аргумент это метод вызова второй параметры
-        owner_id: ownerId,
-        domain: 'https://vk.com/map_proger',
-        count: count,
-        offset: offset,
-        access_token: '1d7ddd241d7ddd241d7ddd24da1e6b89e611d7d1d7ddd24782a8f85f2db81ff7d86fceb',
-        v: version
-    }, (r) => { //! обрабатываем ответ от апи
-        if (r.response) { //! проверка пришло ли нам что либо
-            console.log(r.response)
-        }
+// function loadPosts() { //! объявляем функцию загрузки постов
+//     console.log('fsdfdssd')
+//     VK.Api.call('wall.get', { //! запрос использует ключевые слова VK.Api.call для вызова метода получения постов первый аргумент это метод вызова второй параметры
+//         owner_id: ownerId,
+//         domain: 'map_proger',
+//         count: count,
+//         offset: offset,
+//         access_token: '1d7ddd241d7ddd241d7ddd24da1e6b89e611d7d1d7ddd24782a8f85f2db81ff7d86fceb',
+//         v: version
+//     }, (r) => { //! обрабатываем ответ от апи
+//         if (r.response) { //! проверка пришло ли нам что либо
+//             console.log(r.response)
+//         }
+//         console.log(r)
+//     });
+// }
+const token = '1d7ddd241d7ddd241d7ddd24da1e6b89e611d7d1d7ddd24782a8f85f2db81ff7d86fceb';
+const domain = 'map_proger';
+function loadPosts() {
+    fetch(`${apiUrl}callback=handleResponse&domain=${domain}&count=${count}&offset=${offset}&v=${version}&access_token=${token}`,{
+        mode: 'no-cors',
+    })
+        .then(response => response.json())
+        .then(data => {
+            const newPosts = data.response.items;
+
+            if (newPosts.length > 0) {
+                posts = [...posts, ...newPosts];
+                renderPosts();
+                offset += count;
+            }
+        });
+}
+
+function renderPosts() {
+    widget.innerHTML = '';
+
+    posts.forEach(post => {
+        const postElement = document.createElement('div');
+        postElement.classList.add('post');
+        postElement.textContent = post.text;
+        widget.appendChild(postElement);
     });
 }
-loadPosts()
+
+function handleScroll() {
+    const scrollTop = widget.scrollTop;
+    const scrollHeight = widget.scrollHeight;
+    const clientHeight = widget.clientHeight;
+
+    if (scrollTop + clientHeight >= scrollHeight) {
+        loadPosts();
+    }
+}
+
+function cachePosts() {
+    const cachedPosts = JSON.parse(localStorage.getItem('widgetPosts'));
+
+    if (cachedPosts) {
+        posts = cachedPosts;
+        renderPosts();
+    } else {
+        loadPosts();
+    }
+}
+
+widget.addEventListener('scroll', handleScroll);
+
+window.addEventListener('beforeunload', () => {
+    localStorage.setItem('widgetPosts', JSON.stringify(posts));
+});
+
+cachePosts();
