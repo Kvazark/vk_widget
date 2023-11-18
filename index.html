@@ -8,19 +8,36 @@
 <body>
 <section>
     <h4>Посты</h4>
-    <div id="widget">
-        <ul id="list-posts">
-<!--            <script type="text/javascript">-->
-<!--                VK.init({-->
-<!--                    apiId: 164008117-->
-<!--                });-->
-<!--            </script>-->
-        </ul>
+    <div class="container" id="list-posts">
     </div>
 </section>
 </body>
 <script src="index.js"></script>
 <style>
-
+.container{
+    width: 50vw;
+    margin: 2% auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 1rem;
+}
+.post{
+    border-radius: 15px;
+    padding: 1rem 1rem 0.5rem 1rem;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.post p{
+    text-align:justify;
+}
+.post div{
+    overflow: hidden;
+}
+.post img{
+    width: 100%;
+}
 </style>
 </html>

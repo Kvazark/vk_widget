@@ -1,9 +1,19 @@
 const widget = document.getElementById('widget');
 const apiUrl = 'https://api.vk.com/method/wall.get';
-const ownerId = '-61817535'; // Идентификатор паблика VK
+const ownerId = '-72495085'; // Идентификатор паблика VK
 const version = '5.131'; // Версия API VK
 const count = 10; // Количество постов для загрузки
 let offset = 0; // смещение для загрузки следующей партии постов
+let posts = [];
+const token = '1d7ddd241d7ddd241d7ddd24da1e6b89e611d7d1d7ddd24782a8f85f2db81ff7d86fceb';
+const domain = 'tnull';
+
+function createJSONP() {
+    const script = document.createElement('SCRIPT');
+    script.src = `http://api.vk.com/method/wall.get?owner_id=${ownerId}&count=${count}&offset=${offset}&&extended=1&&access_token=${token}&v=${version}&callback=loadPosts`;
+    document.getElementsByTagName("head")[0].append(script);
+    script.remove()
+}
 
 // function loadPosts(offset, count) {
 //     VK.Api.call('wall.get', {
@@ -241,17 +251,7 @@ let offset = 0; // смещение для загрузки следующей �
 //     });
 // }
 
-console.log('stop')
-const token = '1d7ddd241d7ddd241d7ddd24da1e6b89e611d7d1d7ddd24782a8f85f2db81ff7d86fceb';
-const domain = 'map_proger';
-const list = document.querySelector('#list-posts')
 
-function createJSONP() {
-    const script = document.createElement('SCRIPT');
-    script.src = `http://api.vk.com/method/wall.get?owner_id=${ownerId}&count=${count}&offset=${offset}&&extended=1&&access_token=${token}&v=${version}&callback=loadPosts`;
-    document.getElementsByTagName("head")[0].append(script);
-    script.remove()
-}
 
 // function calcLocal() {
 //     let n = ''
@@ -420,18 +420,32 @@ function createJSONP() {
 //
 // cachePosts();
 ///////////////////////////
-// Глобальные переменные для хранения загруженных данных
-let posts = [];
 
+function formattedDate(str){
+    var year = str.getFullYear();
+    var month = ('0' + (str.getMonth() + 1)).slice(-2);
+    var day = ('0' + str.getDate()).slice(-2);
+    var hours = ('0' + str.getHours()).slice(-2);
+    var minutes = ('0' + str.getMinutes()).slice(-2);
+    var newDate = day + '.' + month + '.' + year + 'г. '  + hours + ':' + minutes;
+    return newDate;
 
+}
 // Функция отображения постов в виджете
 function renderPosts() {
     const widgetContainer = document.getElementById('list-posts');
     widgetContainer.innerHTML = '';
+    console.log(posts)
 
     posts.forEach((post) => {
         const postElement = document.createElement('div');
         postElement.classList.add('post');
+        // Отображаем даты поста
+        const dateSpan = document.createElement('span');
+        var timestamp = post.date;
+        var date = new Date(timestamp * 1000);
+        dateSpan.textContent = formattedDate(date);
+        postElement.appendChild(dateSpan);
 
         // Отображаем текст поста
         const textElement = document.createElement('p');
@@ -439,16 +453,20 @@ function renderPosts() {
         postElement.appendChild(textElement);
 
         // Отображаем медиа-контент (картинки и видео)
+        const containetMedia = document.createElement('div');
         post.attachments.forEach((attachment) => {
             if (attachment.type === 'photo') {
+
                 const photoElement = document.createElement('img');
-                photoElement.src = attachment.photo.sizes[0].url;
-                postElement.appendChild(photoElement);
+                photoElement.src = attachment.photo.sizes[2].url;
+                containetMedia.appendChild(photoElement)
+                postElement.appendChild(containetMedia);
             } else if (attachment.type === 'video') {
                 const videoElement = document.createElement('iframe');
                 videoElement.src = `https://www.youtube.com/embed/${attachment.video.id}`;
                 videoElement.allowFullscreen = true;
-                postElement.appendChild(videoElement);
+                containetMedia.appendChild(videoElement);
+                postElement.appendChild(containetMedia);
             }
         });
 
