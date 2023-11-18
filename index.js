@@ -1,5 +1,5 @@
 const widget = document.getElementById('widget');
-const apiUrl = 'https://api.vk.com/method/wall.get?';
+const apiUrl = 'https://api.vk.com/method/wall.get';
 const ownerId = '-61817535'; // Идентификатор паблика VK
 const version = '5.131'; // Версия API VK
 const count = 10; // Количество постов для загрузки
@@ -240,60 +240,249 @@ let offset = 0; // смещение для загрузки следующей �
 //         console.log(r)
 //     });
 // }
+
+console.log('stop')
 const token = '1d7ddd241d7ddd241d7ddd24da1e6b89e611d7d1d7ddd24782a8f85f2db81ff7d86fceb';
 const domain = 'map_proger';
-function loadPosts() {
-    fetch(`${apiUrl}callback=handleResponse&domain=${domain}&count=${count}&offset=${offset}&v=${version}&access_token=${token}`,{
-        mode: 'no-cors',
-    })
-        .then(response => response.json())
-        .then(data => {
-            const newPosts = data.response.items;
+const list = document.querySelector('#list-posts')
 
-            if (newPosts.length > 0) {
-                posts = [...posts, ...newPosts];
-                renderPosts();
-                offset += count;
-            }
-        });
+function createJSONP() {
+    const script = document.createElement('SCRIPT');
+    script.src = `http://api.vk.com/method/wall.get?owner_id=${ownerId}&count=${count}&offset=${offset}&&extended=1&&access_token=${token}&v=${version}&callback=loadPosts`;
+    document.getElementsByTagName("head")[0].append(script);
+    script.remove()
 }
 
-function renderPosts() {
-    widget.innerHTML = '';
+// function calcLocal() {
+//     let n = ''
+//     let free = ''
+//     let value = ''
+//     for (let i = 0; i < 1024 * 100; i++) n += 1
+//     try {
+//         for (let j = 0; j < 10500; j += 100) {
+//             free += n
+//             localStorage.setItem('local storage', free)
+//             console.log('calculating...');
+//         }
+//     } catch (e) {
+//         for (let k in localStorage) {
+//             if (typeof localStorage[k] === 'string') value += localStorage[k]
+//         }
+//         localStorage.removeItem('local storage')
+//         console.log('local storage', `Total: ${(value.length / 1024000).toFixed(0)}/${(value.length / 1024000 - (free.length - 100) / 1024000).toFixed(1)} MB`)
+//     }
+// }
 
-    posts.forEach(post => {
+// list.addEventListener('scroll', () => {
+//     let scrolled = list.scrollTop / (list.scrollHeight - list.clientHeight) * 100
+//     if (scrolled >= 99.999) {
+//         toggle = false
+//         createJSONP()
+//     }
+// })
+
+// function loadPosts(result) {
+//     const newPosts = result.response.items;
+//
+//     if (newPosts.length > 0) {
+//         posts = [...posts, ...newPosts];
+//         renderPosts();
+//         offset += count;
+//     }
+//     renderPosts(result);
+//     // const {items, groups} = result.response
+//     // console.log(result.response)
+//     // try {
+//     //     if (localStorage.getItem('store') && toggle) {
+//     //         JSON.parse(localStorage.getItem('store')).map(e => {
+//     //             list.insertAdjacentHTML('beforeend', createPost(e, groups[0]))
+//     //         })
+//     //     } else if(!localStorage.getItem('store')) {
+//     //         localStorage.setItem('store', JSON.stringify(items))
+//     //         JSON.parse(localStorage.getItem('store')).map(e => {
+//     //             list.insertAdjacentHTML('beforeend', createPost(e, groups[0]))
+//     //         })
+//     //     } else {
+//     //         localStorage.setItem('store', JSON.stringify([].concat(JSON.parse(localStorage.getItem('store')), items)))
+//     //         localStorage.setItem('offset', offset = Number(offset) + 20)
+//     //         items.map(e => {
+//     //             list.insertAdjacentHTML('beforeend', createPost(e, groups[0]))
+//     //         })
+//     //     }
+//     // } catch(e) {
+//     //     console.log('Overload');
+//     //     let cut = JSON.parse(localStorage.getItem('store'))
+//     //     cut.splice(0,40)
+//     //     localStorage.setItem('store', JSON.stringify([].concat(cut, items)))
+//     //     localStorage.setItem('offset', offset = Number(offset) + 20)
+//     //     JSON.parse(localStorage.getItem('store')).map(e => {
+//     //         list.insertAdjacentHTML('beforeend', createPost(e, groups[0]))
+//     //     })
+//     //     list.scroll(0, list.scrollHeight - list.clientHeight - 5000)
+//     // }
+// }
+
+// function loadPosts() {
+//    // const url = 'https://api.vk.com/method/wall.get?callback=handleResponse&domain=map_proger&count=10&offset=&v=5.131&access_token=1d7ddd241d7ddd241d7ddd24da1e6b89e611d7d1d7ddd24782a8f85f2db81ff7d86fceb'
+//     const url = `${apiUrl}?callback=${handleResponse}&domain=${encodeURIComponent(domain)}&count=${count}&offset=${offset}&v=${version}&access_token=${encodeURIComponent(token)}`
+//     fetch(url)
+//         .then(response => response.json())
+//         .then(data => {
+//             const newPosts = data.response.items;
+//
+//             if (newPosts.length > 0) {
+//                 posts = [...posts, ...newPosts];
+//                 renderPosts();
+//                 offset += count;
+//             }
+//         })
+//         .catch(error => {
+//             console.error('Ошибка при выполнении запроса:', error);
+//         });
+// }
+// function createPost(e, group) {
+//     return `
+//   <article>
+//     <div class="title">
+//       <div class="icon"><img src="${group.photo_50}"/></div>
+//       <div class="name">
+//         <span>${group.name}</span>
+//         <span>${new Date(e.date * 1000).toLocaleDateString()}</span>
+//       </div>
+//     </div>
+//     <div class="text">${e.text}</div>
+//     <div class="media">
+//     ${e.attachments.length ? e.attachments.map(p => {
+//         if (p.type === 'photo') return `<div><img src="${p.photo.sizes[2].url}"></div>`
+//         if (p.type === 'video') return `<div><img src="${p.video.image[2].url}"></div>`
+//     }).join('') : ''}
+//     </div>
+//     <div class="info">
+//       <div class="info-wrapper">
+//         <div class="like">
+//           <span class="material-symbols-outlined">favorite</span>
+//           <span>${e.likes.count}</span>
+//         </div>
+//         <div class="comment">
+//           <span class="material-symbols-outlined">chat_bubble</span>
+//         </div>
+//         <div class="reply">
+//           <span class="material-symbols-outlined">reply</span>
+//           <span>${e.reposts.count}</span>
+//         </div>
+//       </div>
+//       <div class="view">
+//         <span class="material-symbols-outlined">visibility</span>
+//         <span>${e.views.count}</span>
+//       </div
+//     </div>
+//   </article>`
+// }
+
+///////////////////////////////////////////
+// function renderPosts() {
+//     widget.innerHTML = '';
+//
+//     posts.forEach(post => {
+//         const postElement = document.createElement('div');
+//         postElement.classList.add('post');
+//         postElement.textContent = post.text;
+//         widget.appendChild(postElement);
+//     });
+// }
+//
+// function handleScroll() {
+//     const scrollTop = widget.scrollTop;
+//     const scrollHeight = widget.scrollHeight;
+//     const clientHeight = widget.clientHeight;
+//
+//     if (scrollTop + clientHeight >= scrollHeight) {
+//         createJSONP();
+//     }
+// }
+//
+// function cachePosts() {
+//     const cachedPosts = JSON.parse(localStorage.getItem('widgetPosts'));
+//
+//     if (cachedPosts) {
+//         posts = cachedPosts;
+//         renderPosts();
+//     } else {
+//         createJSONP();
+//     }
+// }
+//
+// widget.addEventListener('scroll', handleScroll);
+//
+// window.addEventListener('beforeunload', () => {
+//     localStorage.setItem('widgetPosts', JSON.stringify(posts));
+// });
+//
+// cachePosts();
+///////////////////////////
+// Глобальные переменные для хранения загруженных данных
+let posts = [];
+
+
+// Функция отображения постов в виджете
+function renderPosts() {
+    const widgetContainer = document.getElementById('list-posts');
+    widgetContainer.innerHTML = '';
+
+    posts.forEach((post) => {
         const postElement = document.createElement('div');
         postElement.classList.add('post');
-        postElement.textContent = post.text;
-        widget.appendChild(postElement);
+
+        // Отображаем текст поста
+        const textElement = document.createElement('p');
+        textElement.textContent = post.text;
+        postElement.appendChild(textElement);
+
+        // Отображаем медиа-контент (картинки и видео)
+        post.attachments.forEach((attachment) => {
+            if (attachment.type === 'photo') {
+                const photoElement = document.createElement('img');
+                photoElement.src = attachment.photo.sizes[0].url;
+                postElement.appendChild(photoElement);
+            } else if (attachment.type === 'video') {
+                const videoElement = document.createElement('iframe');
+                videoElement.src = `https://www.youtube.com/embed/${attachment.video.id}`;
+                videoElement.allowFullscreen = true;
+                postElement.appendChild(videoElement);
+            }
+        });
+
+        widgetContainer.appendChild(postElement);
     });
 }
+// Функция загрузки постов
+function loadPosts(response) {
+    const newPosts = response.response.items;
 
-function handleScroll() {
-    const scrollTop = widget.scrollTop;
-    const scrollHeight = widget.scrollHeight;
-    const clientHeight = widget.clientHeight;
-
-    if (scrollTop + clientHeight >= scrollHeight) {
-        loadPosts();
+    if (newPosts.length > 0) {
+        // Обрабатываем новые посты
+        handlePosts(newPosts);
+        offset += count;
     }
 }
+function handlePosts(newPosts) {
+    // Обрабатываем полученные посты
+    posts = [...posts, ...newPosts];
+    renderPosts();
+}
 
+// Функция кэширования данных
 function cachePosts() {
-    const cachedPosts = JSON.parse(localStorage.getItem('widgetPosts'));
-
-    if (cachedPosts) {
-        posts = cachedPosts;
-        renderPosts();
-    } else {
-        loadPosts();
-    }
 }
 
-widget.addEventListener('scroll', handleScroll);
-
-window.addEventListener('beforeunload', () => {
-    localStorage.setItem('widgetPosts', JSON.stringify(posts));
-});
-
-cachePosts();
+// Функция инициализации виджета
+function initWidget() {
+    cachePosts();
+    if (posts.length === 0) {
+        createJSONP();
+    } else {
+        renderPosts();
+    }
+}
+// Вызываем функцию инициализации виджета при загрузке страницы
+window.addEventListener('DOMContentLoaded', initWidget);
